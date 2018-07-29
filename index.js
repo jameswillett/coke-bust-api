@@ -53,7 +53,7 @@ app.get('/news', async (req, res) => {
 
 app.get('/releases', async (req, res) => {
   try {
-    const { rows: releases } = await pool.query('SELECT id, name, year, imgsrc FROM RELEASES ORDER BY year DESC');
+    const { rows: releases } = await pool.query('SELECT id, name, year, imgsrc, meta FROM RELEASES ORDER BY year DESC');
     return res.json(releases);
   } catch (e) {
     return res.send(e);
