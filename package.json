@@ -1,0 +1,17 @@
+{
+  "name": "cokebustapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "james willett",
+  "license": "WTFPL",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "date-fns": "^1.29.0",
+    "express": "^4.16.3",
+    "pg": "^7.4.3"
+  }
+}
