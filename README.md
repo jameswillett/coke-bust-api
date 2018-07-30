@@ -1,7 +1,10 @@
 # coke-bust-api
-`/news` -> all the news  
-`/releases` -> name, year, id, and img src of all releases  
-`/releases/{id}` -> all the info for given release  
-`/shows` -> all shows that are today or in the future  
-`/shows/all` -> ALL shows ever  
-`/` -> everything in one stupid huge json object  
+
+`PORT=4000 node index.js` to get it running  
+
+`get /news` -> all the news  
+`get /releases` -> name, year, id, meta, and img src of all releases  
+`get /releases/{id}` -> all the info for given release  
+`get /shows` -> all shows that are today or in the future  
+`get /shows/all` -> ALL shows ever  
+`get /` -> everything in one stupid huge json object  
