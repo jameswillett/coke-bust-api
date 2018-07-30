@@ -1,6 +1,6 @@
 const express = require('express');
 const { Pool } = require('pg');
-const format = require('date-fns/format');
+const moment = require('moment-timezone');
 const Promise = require('bluebird');
 
 const app = express();
@@ -33,9 +33,10 @@ app.get('/', async (req, res) => {
 
 app.get('/shows/:all?', async (req, res) => {
   const { all } = req.params;
-  const today = format(!all ? new Date() : new Date('1987-03-20'), 'YYYY-MM-DD')
+  const date = all ? moment('1987-03-20') : moment()
+  const minDate = date.tz("America/New_York").format('YYYY-MM-DD')
   try {
-    const { rows: shows } = await pool.query(`SELECT * FROM SHOWS WHERE date >= $1`, [today]);
+    const { rows: shows } = await pool.query(`SELECT * FROM SHOWS WHERE date >= $1`, [minDate]);
     return res.send(shows);
   } catch (e) {
     return res.send(e);
