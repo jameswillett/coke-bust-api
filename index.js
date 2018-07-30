@@ -44,7 +44,7 @@ app.get('/shows/:all?', async (req, res) => {
 
 app.get('/news', async (req, res) => {
   try {
-    const { rows: news } = await pool.query('SELECT * FROM NEWS');
+    const { rows: news } = await pool.query('SELECT * FROM NEWS ORDER BY date DESC');
     return res.json(news);
   } catch (e) {
     return res.send(e);
