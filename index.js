@@ -5,8 +5,7 @@ const Promise = require('bluebird');
 
 const app = express();
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://james:@localhost:5432/cokebust';
-const pool = new Pool({ connectionString });
+const pool = new Pool();
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
