@@ -6,6 +6,7 @@ const Promise = require('bluebird');
 const app = express();
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://james:@localhost:5432/cokebust';
+console.log(connectionString);
 const pool = new Pool({ connectionString });
 
 app.use((req, res, next) => {
