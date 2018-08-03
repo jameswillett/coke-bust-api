@@ -1,7 +1,5 @@
 # coke-bust-api
 
-`PORT=4000 node index.js` to get it running  
-
 `get /news` -> all the news  
 `get /releases` -> name, year, id, meta, and img src of all releases  
 `get /releases/{id}` -> all the info for given release  
