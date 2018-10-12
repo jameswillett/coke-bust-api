@@ -34,13 +34,14 @@ app.get('/', async (req, res) => {
 app.get('/shows/:all?', async (req, res) => {
   const { all } = req.params;
   const date = all ? moment('1987-03-20') : moment()
-  const minDate = date.tz("America/New_York").format('YYYY-MM-DD')
+  const minDate = date.format('YYYY-MM-DD')
   try {
     const { rows: shows } = await pool.query(`SELECT * FROM SHOWS WHERE date >= $1`, [minDate]);
-    return res.send(shows.map(s => ({
+    const mappedShows = shows.map(s => ({
       ...s,
-      date: moment(show.date).format('YYYY-MM-DD'),
-    })));
+      date: moment(s.date).format('YYYY-MM-DD'),
+    }))
+    return res.send(mappedShows);
   } catch (e) {
     return res.send(e);
   }
