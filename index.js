@@ -50,7 +50,11 @@ app.get('/shows/:all?', async (req, res) => {
 app.get('/news', async (req, res) => {
   try {
     const { rows: news } = await pool.query('SELECT * FROM NEWS ORDER BY date DESC');
-    return res.json(news);
+    const mappedNews = news.map(e => ({
+      ...e,
+      date: moment(e.date).format('YYYY-MM-DD'),
+    }));
+    return res.json(mappedNews);
   } catch (e) {
     return res.send(e);
   }
