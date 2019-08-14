@@ -12,8 +12,6 @@ const app = express();
 const connectionString = process.env.DATABASE_URL || 'postgresql://james:@localhost:5432/cokebust';
 const pool = new Pool({ connectionString });
 
-const scoresService = require('./scoresService')(pool);
-
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header(
@@ -25,14 +23,6 @@ app.use((req, res, next) => {
 
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({limit: '50mb'}));
-
-const query = async (sql, params) => {
-  const { rows } = await pool.query(sql, params);
-  return rows;
-};
-
-const queryOne = (sql, params) => query(sql, query).then(R.head);
-const format = d => moment(d).format('YY MM DD HH SS');
 
 app.get('/', async (req, res) => {
   const queries = [
@@ -91,129 +81,26 @@ app.get('/releases/:id', async (req, res) => {
   }
 });
 
-app.get('/minesweeper/top50', async (req, res) => {
-  try {
-    const { rows } = await pool.query(`
-      SELECT id, name, score, difficulty FROM scores
-      WHERE is_complete
-      ORDER BY score DESC
-      LIMIT 50
-      `);
-
-    return res.send({ rows });
-  } catch (e) {
-    console.log(e);
-    res.send(e);
-  }
-});
-
-app.post('/minesweeper/newgame', async (req, res) => {
-  const {
-    minClicks,
-    difficulty,
-  } = req.body;
-
-  try {
-    const { rows: [r] } = await pool.query(`
-      INSERT INTO scores (minclicks, difficulty)
-      VALUES ($1, $2)
-      RETURNING *
-      `, [minClicks, difficulty]
-    );
-
-    return res.send(R.pick(['id'], r));
-  } catch (e) {
-    console.log(e);
-    return res.send(e);
-  }
-});
-
-app.post('/minesweeper/recordclick', async (req, res) => {
-  const {
-    id,
-  } = req.body;
-
-  try {
-    const { rows: [r] } = await pool.query(`
-      SELECT id, clicks FROM scores
-      WHERE id = $1 AND NOT is_complete
-    `, [id]);
-
-    if (!r) {
-      console.log('you cheatin');
-      throw new Error('you cheatin');
-    }
-
-    await query(`
-      UPDATE scores SET clicks = $1
-      WHERE id = $2 AND NOT is_complete
-    `, [r.clicks + 1, id]);
-
-    return res.send('click recorded');
-  } catch(e) {
-    console.log(e);
-    return res.send(e);
-  }
-});
-
 app.post('/minesweeper/newscore', async (req, res) => {
   const {
-    clicks, board, startedAt, endedAt, difficulty, id,
+    clicks, board, startedAt, endedAt, difficulty
   } = req.body;
   const minClicks = get3BV(board);
   const time = moment(endedAt).diff(startedAt, 'seconds');
+  const theScore = score(minClicks, clicks, time);
+  console.log(theScore, clicks, time, minClicks, difficulty);
   try {
-    const { rows: [c] } = await pool.query(`
-      SELECT clicks, minclicks FROM scores WHERE id = $1 AND NOT is_complete
-    `, [id]);
-
-    const theScore = score(minClicks, c.clicks, time, difficulty);
     const { rows: [r] } = await pool.query(`
-      UPDATE scores SET
-      score = $2, time = $3, is_complete = true
-      WHERE id = $1 and not is_complete
+      INSERT INTO scores (score, clicks, time, minclicks, difficulty)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
-    `, [id, theScore, time]);
-    const n = await scoresService.getNeighbors(r.id);
-    res.send({ id: r.id });
+    `, [theScore, clicks, time, minClicks, difficulty]);
   } catch(e) {
     console.log(e);
     return res.send(e);
   }
-});
-
-app.get('/minesweeper/gameover/:id', async (req, res) => {
-  const {
-    id,
-  } = req.params;
-
-  try {
-    await pool.query(`
-      DELETE FROM scores WHERE id = $1
-    `, [id]);
-
-    return res.send({});
-  } catch (e) {
-    console.log(e);
-    res.send(e);
-  }
-});
-
-app.post('/minesweeper/registername', async (req, res) => {
-  const { name, id } = req.body;
-
-  try {
-    await pool.query(`
-      UPDATE scores
-      SET name = $1
-      WHERE id = $2;
-    `, [name, id]);
-
-    return res.send({});
-  } catch (e) {
-    console.log(e);
-    return res.send(e);
-  }
+  console.log(r);
+  return res.json({ message: 'yay' });
 });
 
 const listener = app.listen(process.env.PORT || 4000, () => {

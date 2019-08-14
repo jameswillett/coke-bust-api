@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS scores (
+  id serial,
+  score integer,
+  clicks integer,
+  time integer,
+  minclicks integer,
+  difficulty integer,
+  name text,
+  is_complete boolean default false
+)
