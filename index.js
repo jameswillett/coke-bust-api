@@ -24,9 +24,14 @@ app.use((req, res, next) => {
 });
 
 const makeGillissLifeHarder = (req, res, next) => {
-  console.log(req.headers.origin);
-  console.log(process.env.NODE_ENV);
-  next();
+  if (
+    process.env.NODE_ENV === 'production' &&
+    req.headers.origin !== 'http://minesweepie.herokuapp.com'
+  ) {
+    return res.status(500).send({ error: 'u a punk' })
+  } else {
+    next();
+  }
 }
 
 // app.use(bodyParser.urlencoded({ extended: true }));
@@ -102,7 +107,7 @@ app.get('/releases/:id', async (req, res) => {
   }
 });
 
-app.get('/minesweeper/top50', makeGillissLifeHarder, async (req, res) => {
+app.get('/minesweeper/top50', async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT id, name, score, difficulty FROM scores
