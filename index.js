@@ -112,6 +112,7 @@ app.get('/minesweeper/top50', async (req, res) => {
     const { rows } = await pool.query(`
       SELECT id, name, score, difficulty FROM scores
       WHERE is_complete
+      AND name IS NOT NULL
       ORDER BY score DESC
       LIMIT 50
       `);
