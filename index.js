@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 
 const makeGillissLifeHarder = (req, res, next) => {
   console.log(req.headers.origin);
-  console.log(req.headers.host);
+  console.log(NODE_ENV);
   next();
 }
 
