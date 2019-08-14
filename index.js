@@ -23,6 +23,12 @@ app.use((req, res, next) => {
   next();
 });
 
+const makeGillissLifeHarder = (req, res, next) => {
+  console.log(req.headers.origin);
+  console.log(req.headers.host);
+  next();
+}
+
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({limit: '50mb'}));
 
@@ -96,7 +102,7 @@ app.get('/releases/:id', async (req, res) => {
   }
 });
 
-app.get('/minesweeper/top50', async (req, res) => {
+app.get('/minesweeper/top50', makeGillissLifeHarder, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT id, name, score, difficulty FROM scores
@@ -112,7 +118,7 @@ app.get('/minesweeper/top50', async (req, res) => {
   }
 });
 
-app.post('/minesweeper/newgame', async (req, res) => {
+app.post('/minesweeper/newgame', makeGillissLifeHarder, async (req, res) => {
   const {
     minClicks,
     difficulty,
@@ -133,7 +139,7 @@ app.post('/minesweeper/newgame', async (req, res) => {
   }
 });
 
-app.post('/minesweeper/recordclick', async (req, res) => {
+app.post('/minesweeper/recordclick', makeGillissLifeHarder, async (req, res) => {
   const {
     id,
   } = req.body;
@@ -161,16 +167,27 @@ app.post('/minesweeper/recordclick', async (req, res) => {
   }
 });
 
-app.post('/minesweeper/newscore', async (req, res) => {
+app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
   const {
     clicks, board, startedAt, endedAt, difficulty, id,
   } = req.body;
-  const minClicks = get3BV(board);
-  const time = moment(endedAt).diff(startedAt, 'seconds');
   try {
     const { rows: [c] } = await pool.query(`
       SELECT clicks, minclicks FROM scores WHERE id = $1 AND NOT is_complete
     `, [id]);
+
+    if (board.filter(r => Array.isArray(r)).length !== board.length) {
+      throw new Error('you cheatin');
+    }
+
+    const minClicks = get3BV(board);
+    const time = moment(endedAt).diff(startedAt, 'seconds');
+
+    if (clicks !== c.clicks) {
+      console.log('i found a cheater');
+      throw new Error('you cheatin');
+    };
+
 
     const theScore = score(minClicks, c.clicks, time, difficulty);
     const { rows: [r] } = await pool.query(`
@@ -187,7 +204,7 @@ app.post('/minesweeper/newscore', async (req, res) => {
   }
 });
 
-app.get('/minesweeper/gameover/:id', async (req, res) => {
+app.get('/minesweeper/gameover/:id', makeGillissLifeHarder, async (req, res) => {
   const {
     id,
   } = req.params;
@@ -204,7 +221,7 @@ app.get('/minesweeper/gameover/:id', async (req, res) => {
   }
 });
 
-app.post('/minesweeper/registername', async (req, res) => {
+app.post('/minesweeper/registername', makeGillissLifeHarder, async (req, res) => {
   const { name, id } = req.body;
 
   try {
