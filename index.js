@@ -201,7 +201,6 @@ app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
       WHERE id = $1 and not is_complete
       RETURNING *;
     `, [id, theScore, time]);
-    const n = await scoresService.getNeighbors(r.id);
     res.send({ id: r.id });
   } catch(e) {
     console.log(e);
