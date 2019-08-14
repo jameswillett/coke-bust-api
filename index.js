@@ -234,7 +234,7 @@ app.post('/minesweeper/registername', makeGillissLifeHarder, async (req, res) =>
       UPDATE scores
       SET name = $1
       WHERE id = $2;
-    `, [name, id]);
+    `, [String(name).substr(0, 30), id]);
 
     return res.send({});
   } catch (e) {
