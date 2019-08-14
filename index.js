@@ -194,7 +194,7 @@ app.get('/minesweeper/gameover/:id', async (req, res) => {
 
   try {
     await pool.query(`
-      DELETE FROM scores WHERE id = $1
+      DELETE FROM scores WHERE id = $1 AND NOT is_complete
     `, [id]);
 
     return res.send({});
