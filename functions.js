@@ -49,7 +49,7 @@ const get3BV = (board) => {
     return { board: newBoard , chunks: a.chunks + 1 };
   }, { board, chunks: 0 })
 
-  const bits = edges.board.filter(c => c.count > 0 && !c.marked && !c.isMine).length;
+  const bits = flatten(edges.board).filter(c => c.count > 0 && !c.marked && !c.isMine).length;
 
   return edges.chunks + bits;
 };
