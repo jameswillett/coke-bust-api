@@ -242,7 +242,8 @@ app.post('/minesweeper/registername', makeGillissLifeHarder, async (req, res) =>
     await pool.query(`
       UPDATE scores
       SET name = $1
-      WHERE id = $2;
+      WHERE id = $2
+      AND is_complete;
     `, [String(name).substr(0, 30), id]);
 
     return res.send({});
