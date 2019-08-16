@@ -5,6 +5,7 @@ const Promise = require('bluebird');
 const bodyParser = require('body-parser');
 const R = require('ramda');
 
+const dejarble = require('./dejarbler')(process.env.JARBLE_CODE);
 const { get3BV, score } = require('./functions');
 
 const app = express();
@@ -148,7 +149,13 @@ app.post('/minesweeper/newgame', makeGillissLifeHarder, async (req, res) => {
 app.post('/minesweeper/recordclick', makeGillissLifeHarder, async (req, res) => {
   const {
     id,
+    t,
+    jarbled,
   } = req.body;
+
+  console.log(dejarble(jarbled))
+  console.log(String(t));
+  console.log('t equals dejarbled jarble? ', dejarble(jarbled) === t)
 
   try {
     const { rows: [r] } = await pool.query(`
