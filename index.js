@@ -153,11 +153,10 @@ app.post('/minesweeper/recordclick', makeGillissLifeHarder, async (req, res) => 
     jarbled,
   } = req.body;
 
-  console.log(dejarble(jarbled))
-  console.log(String(t));
-  console.log('t equals dejarbled jarble? ', dejarble(jarbled) === t)
-
   try {
+    if (dejarble(jarbled) !== t) {
+      throw new Error('youre a dang cheater or james fucked something up');
+    }
     const { rows: [r] } = await pool.query(`
       SELECT id, clicks FROM scores
       WHERE id = $1 AND NOT is_complete
@@ -182,9 +181,12 @@ app.post('/minesweeper/recordclick', makeGillissLifeHarder, async (req, res) => 
 
 app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
   const {
-    clicks, board, startedAt, endedAt, difficulty, id,
+    clicks, board, startedAt, endedAt, difficulty, id, t, jarbled,
   } = req.body;
   try {
+    if (dejarble(jarbled) !== t) {
+      throw new Error('youre a dang cheater or james fucked something up');
+    }
     const { rows: [c] } = await pool.query(`
       SELECT clicks, minclicks FROM scores WHERE id = $1 AND NOT is_complete
     `, [id]);
