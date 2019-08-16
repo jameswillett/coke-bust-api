@@ -227,7 +227,7 @@ app.get('/minesweeper/gameover/:id', makeGillissLifeHarder, async (req, res) => 
 
   try {
     await pool.query(`
-      DELETE FROM scores WHERE id = $1 AND NOT is_complete AND name IS NOT NULL
+      DELETE FROM scores WHERE id = $1 AND NOT is_complete AND name IS NULL
     `, [id]);
 
     return res.send({});
