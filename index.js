@@ -185,6 +185,7 @@ app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
   } = req.body;
   try {
     if (dejarble(jarbled) !== t) {
+      console.log('jarbler mismatch: ', dejarble(jarbled), t);
       throw new Error('youre a dang cheater or james fucked something up');
     }
     const { rows: [c] } = await pool.query(`
@@ -192,6 +193,7 @@ app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
     `, [id]);
 
     if (board.filter(r => Array.isArray(r)).length !== board.length) {
+      console.log('board mismatch');
       throw new Error('you cheatin');
     }
 
