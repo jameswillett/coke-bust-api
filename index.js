@@ -14,6 +14,7 @@ const connectionString = process.env.DATABASE_URL || 'postgresql://james:@localh
 const pool = new Pool({ connectionString });
 
 const scoresService = require('./scoresService')(pool);
+const newKey = () => Number(String(Math.random()).substring(2)).toString(36);
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -121,7 +122,8 @@ app.get('/minesweeper/top50', async (req, res) => {
     return res.send({ rows });
   } catch (e) {
     console.log(e);
-    res.send(e);
+    res.status(500);
+    return res.send(e);
   }
 });
 
@@ -133,15 +135,16 @@ app.post('/minesweeper/newgame', makeGillissLifeHarder, async (req, res) => {
 
   try {
     const { rows: [r] } = await pool.query(`
-      INSERT INTO scores (minclicks, difficulty)
-      VALUES ($1, $2)
+      INSERT INTO scores (minclicks, difficulty, lastkey)
+      VALUES ($1, $2, $3)
       RETURNING *
-      `, [minClicks, difficulty]
+      `, [minClicks, difficulty, newKey()]
     );
 
-    return res.send(R.pick(['id'], r));
+    return res.send(R.pick(['id', 'lastkey'], r));
   } catch (e) {
     console.log(e);
+    res.status(500);
     return res.send(e);
   }
 });
@@ -149,48 +152,52 @@ app.post('/minesweeper/newgame', makeGillissLifeHarder, async (req, res) => {
 app.post('/minesweeper/recordclick', makeGillissLifeHarder, async (req, res) => {
   const {
     id,
-    t,
-    jarbled,
+    key,
   } = req.body;
 
   try {
-    if (dejarble(jarbled) !== t) {
-      throw new Error('youre a dang cheater or james fucked something up');
-    }
     const { rows: [r] } = await pool.query(`
-      SELECT id, clicks FROM scores
+      SELECT id, clicks, lastkey FROM scores
       WHERE id = $1 AND NOT is_complete
     `, [id]);
+
+    if (dejarble(key) !== r.lastkey) {
+      console.log(key, dejarble(key), r.lastkey);
+      throw new Error('youre a dang cheater or james fucked something up');
+    }
 
     if (!r) {
       console.log('you cheatin');
       throw new Error('you cheatin');
     }
 
-    await query(`
-      UPDATE scores SET clicks = $1
+    const [newRow] = await query(`
+      UPDATE scores SET clicks = $1, lastkey = $3
       WHERE id = $2 AND NOT is_complete
-    `, [r.clicks + 1, id]);
+      RETURNING *
+    `, [r.clicks + 1, id, newKey()]);
 
-    return res.send('click recorded');
+    return res.send(newRow);
   } catch(e) {
     console.log(e);
+    res.status(500);
     return res.send(e);
   }
 });
 
 app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
   const {
-    clicks, board, startedAt, endedAt, difficulty, id, t, jarbled,
+    clicks, board, startedAt, endedAt, difficulty, id, key,
   } = req.body;
   try {
-    if (dejarble(jarbled) !== t) {
-      console.log('jarbler mismatch: ', dejarble(jarbled), t);
+    const { rows: [c] } = await pool.query(`
+      SELECT clicks, minclicks, lastkey FROM scores WHERE id = $1 AND NOT is_complete
+    `, [id]);
+
+    if (dejarble(key) !== c.lastkey) {
+      console.log('jarbler mismatch: ', dejarble(key), c.lastkey);
       throw new Error('youre a dang cheater or james fucked something up');
     }
-    const { rows: [c] } = await pool.query(`
-      SELECT clicks, minclicks FROM scores WHERE id = $1 AND NOT is_complete
-    `, [id]);
 
     if (board.filter(r => Array.isArray(r)).length !== board.length) {
       console.log('board mismatch');
@@ -216,6 +223,7 @@ app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
     res.send({ id: r.id });
   } catch(e) {
     console.log(e);
+    res.status(500);
     return res.send(e);
   }
 });
@@ -233,7 +241,8 @@ app.get('/minesweeper/gameover/:id', makeGillissLifeHarder, async (req, res) => 
     return res.send({});
   } catch (e) {
     console.log(e);
-    res.send(e);
+    res.status(500);
+    return res.send(e);
   }
 });
 
@@ -250,6 +259,7 @@ app.post('/minesweeper/registername', makeGillissLifeHarder, async (req, res) =>
     return res.send({});
   } catch (e) {
     console.log(e);
+    res.status(500);
     return res.send(e);
   }
 });
