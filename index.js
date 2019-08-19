@@ -194,26 +194,21 @@ app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
       SELECT clicks, minclicks, lastkey FROM scores WHERE id = $1 AND NOT is_complete
     `, [id]);
 
-    if (dejarble(key) !== c.lastkey) {
-      console.log('jarbler mismatch: ', dejarble(key), c.lastkey);
-      throw new Error('youre a dang cheater or james fucked something up');
-    }
-
-    if (board.filter(r => Array.isArray(r)).length !== board.length) {
-      console.log('board mismatch');
-      throw new Error('you cheatin');
-    }
-
     const minClicks = get3BV(board);
     const time = moment(endedAt).diff(startedAt, 'seconds');
 
-    if (clicks !== c.clicks) {
-      console.log('i found a cheater');
-      throw new Error('you cheatin');
-    };
-
-
     const theScore = score(minClicks, c.clicks, time, difficulty);
+
+    if (dejarble(key) !== c.lastkey) {
+      console.log('jarbler mismatch: ', dejarble(key), c.lastkey, `${id} would have a score of ${theScore}`);
+      throw new Error(`youre a dang cheater or james fucked something up.`);
+    }
+
+    if (board.filter(r => Array.isArray(r)).length !== board.length) {
+      console.log('board mismatch', `${id} would have a score of ${theScore}`);
+      throw new Error(`you cheatin.`);
+    }
+
     const { rows: [r] } = await pool.query(`
       UPDATE scores SET
       score = $2, time = $3, is_complete = true
