@@ -161,11 +161,6 @@ app.post('/minesweeper/recordclick', makeGillissLifeHarder, async (req, res) => 
       WHERE id = $1 AND NOT is_complete
     `, [id]);
 
-    if (dejarble(key) !== r.lastkey) {
-      console.log(key, dejarble(key), r.lastkey);
-      throw new Error('youre a dang cheater or james fucked something up');
-    }
-
     if (!r) {
       console.log('you cheatin');
       throw new Error('you cheatin');
