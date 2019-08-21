@@ -192,7 +192,7 @@ app.post('/minesweeper/newscore', makeGillissLifeHarder, async (req, res) => {
     const minClicks = get3BV(board);
     const time = moment(endedAt).diff(startedAt, 'seconds');
 
-    const theScore = score(minClicks, c.clicks, time, difficulty);
+    const theScore = score(minClicks, Math.max(c.clicks, clicks), time, difficulty);
 
     if (dejarble(key) !== c.lastkey) {
       console.log('jarbler mismatch: ', dejarble(key), c.lastkey, `${id} would have a score of ${theScore}`);
