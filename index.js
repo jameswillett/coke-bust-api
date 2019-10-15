@@ -49,9 +49,9 @@ const format = d => moment(d).format('YY MM DD HH SS');
 
 app.get('/', async (req, res) => {
   const queries = [
-    pool.query('SELECT * FROM SHOWS'),
-    pool.query('SELECT * FROM NEWS'),
-    pool.query('SELECT * FROM RELEASES')
+    pool.query(`SELECT * FROM SHOWS`),
+    pool.query(`SELECT * FROM NEWS`),
+    pool.query(`SELECT * FROM RELEASES`)
   ]
   try {
     const [ shows, news, releases ] = await Promise.map(queries, ({ rows }) => rows);
@@ -79,7 +79,7 @@ app.get('/shows/:all?', async (req, res) => {
 
 app.get('/news', async (req, res) => {
   try {
-    const { rows: news } = await pool.query('SELECT * FROM NEWS ORDER BY date DESC');
+    const { rows: news } = await pool.query(`SELECT * FROM NEWS ORDER BY date DESC`);
     const mappedNews = news.map(e => ({
       ...e,
       date: moment(e.date).format('YYYY-MM-DD'),
@@ -92,7 +92,7 @@ app.get('/news', async (req, res) => {
 
 app.get('/releases', async (req, res) => {
   try {
-    const { rows: releases } = await pool.query('SELECT id, name, year, imgsrc, meta FROM RELEASES ORDER BY year DESC');
+    const { rows: releases } = await pool.query(`SELECT id, name, year, imgsrc, meta FROM RELEASES ORDER BY year DESC`);
     return res.json(releases);
   } catch (e) {
     return res.send(e);
@@ -102,7 +102,7 @@ app.get('/releases', async (req, res) => {
 app.get('/releases/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const { rows: [ release ] } = await pool.query('SELECT * FROM RELEASES WHERE id=$1', [id]);
+    const { rows: [ release ] } = await pool.query(`SELECT * FROM RELEASES WHERE id=$1`, [id]);
     return res.json(release);
   } catch (e) {
     return res.send(e);
