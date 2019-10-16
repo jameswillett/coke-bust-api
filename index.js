@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 const makeGillissLifeHarder = (req, res, next) => {
   if (
     process.env.NODE_ENV === 'production' &&
-    req.headers.origin !== 'http://minesweepie.herokuapp.com'
+    /minesweepie\.herokuapp\.com$/.test(req.headers.origin)
   ) {
     return res.status(500).send({ error: 'u a punk' })
   } else {
