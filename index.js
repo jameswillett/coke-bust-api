@@ -29,7 +29,7 @@ const makeGillissLifeHarder = (req, res, next) => {
   if (process.env.NODE_ENV === 'production') {
     if (
       /minesweepie\.herokuapp\.com$/.test(req.headers.origin) ||
-      /jameswillett\.github\.io\/minesweeper/.test(req.headers.origin)
+      /jameswillett\.github\.io/.test(req.headers.origin)
     ) {
       return next()
     } else {
