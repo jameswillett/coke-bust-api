@@ -62,6 +62,7 @@ app.get('/', async (req, res) => {
   ]
   try {
     console.log("about to hit the db")
+    console.log(connectionString);
     const [ shows, news, releases ] = await Promise.map(queries, ({ rows }) => rows);
     console.log("hit the db, sending")
     return res.json({ shows, news, releases });
