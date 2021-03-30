@@ -54,15 +54,19 @@ const queryOne = (sql, params) => query(sql, query).then(R.head);
 const format = d => moment(d).format('YY MM DD HH SS');
 
 app.get('/', async (req, res) => {
+  console.log("hitting /")
   const queries = [
     pool.query(`SELECT * FROM SHOWS`),
     pool.query(`SELECT * FROM NEWS`),
     pool.query(`SELECT * FROM RELEASES`)
   ]
   try {
+    console.log("about to hit the db")
     const [ shows, news, releases ] = await Promise.map(queries, ({ rows }) => rows);
+    console.log("hit the db, sending")
     return res.json({ shows, news, releases });
   } catch (e) {
+    console.log("something went wrong!!!!");
     return res.send(e);
   }
 });
