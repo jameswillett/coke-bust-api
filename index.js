@@ -11,7 +11,10 @@ const { get3BV, score } = require('./functions');
 const app = express();
 
 const connectionString = process.env.DATABASE_URL || 'postgresql://james:@localhost:5432/cokebust';
-const pool = new Pool({ connectionString });
+const pool = new Pool({
+  connectionString,
+  ssl: { rejectUnauthorized: false },
+});
 
 const scoresService = require('./scoresService')(pool);
 const newKey = () => Number(String(Math.random()).substring(2)).toString(36);
